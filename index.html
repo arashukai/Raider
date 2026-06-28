@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#e6b422" />
+  <title>荒衆会 Raider</title>
+  <meta name="description" content="" />
+  <link rel="icon" href="https://i.imgur.com/MGmSBzR.png" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="ARSK" />
+  <meta property="og:title"       content="Raider" />
+  <meta property="og:description" content="荒衆会製　Raider" />
+  <meta property="og:url"         content="" />
+  <meta property="og:image"       content="" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #202225; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #5865f2; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #7289da; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg,#2f3136,#1e1f22);
+      color:#fff;
+      margin:0; padding:0;
+      display:flex; justify-content:center; align-items:center;
+      height:100vh;
+      user-select: none;
+    }
+    .card {
+      background:#36393f;
+      padding:32px;
+      border-radius:20px;
+      box-shadow:0 15px 35px rgba(0,0,0,.5);
+      width:100%; max-width:600px;
+      animation:fadeIn .8s ease;
+      overflow:auto; max-height:95vh;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    h2 { color:#adb8ff; text-align:center; margin:0 0 24px; font-weight:600; }
+    label { display:block; margin-top:18px; font-size:14px; }
+    input[type="text"], textarea {
+      width:100%; padding:10px; margin-top:6px;
+      border-radius:8px; border:none;
+      background:#202225; color:#fff;
+      font-family:monospace; resize:vertical;
+    }
+    textarea { overflow-y:auto; }
+    input[type="number"] {
+      padding:6px; margin-top:6px;
+      border-radius:8px; border:none;
+      background:#202225; color:#fff;
+      font-family:monospace; appearance:none;
+      width:80px;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance:none; margin:0;
+    }
+    .row {
+      display:flex; gap:12px; align-items:center;
+    }
+    .row > * { flex:none; }
+    .row label,
+    .row .checkbox-container { margin-top:0; }
+    .checkbox-container {
+      display:flex; align-items:center; gap:8px;
+      cursor:pointer; font-size:14px; user-select:none;
+      margin-top:6px;
+    }
+    .checkbox-container input {
+      appearance:none; width:36px; height:18px;
+      background:#4f545c; border-radius:18px;
+      position:relative; transition:background .3s ease;
+    }
+    .checkbox-container:hover input { background:#5a5f68; }
+    .checkbox-container input:focus {
+      outline:none; box-shadow:0 0 0 3px rgba(114,137,218,0.5);
+    }
+    .checkbox-container input::before {
+      content:''; position:absolute;
+      width:14px; height:14px; border-radius:50%;
+      background:#fff; top:2px; left:2px;
+      transition:transform .3s cubic-bezier(.68,-.55,.27,1.55);
+    }
+    .checkbox-container input:checked { background:#7289da; }
+    .checkbox-container input:checked::before {
+      transform:translateX(18px);
+    }
+    .checkbox-container span { transition:color .3s; }
+    .checkbox-container input:checked + span {
+      color:#adb8ff;
+    }
+    button.primary {
+      margin-top:24px; width:100%; padding:14px;
+      border:none; border-radius:14px;
+      background:linear-gradient(135deg,#6d75ff,#5865f2);
+      color:#fff; font-weight:700; font-size:18px;
+      letter-spacing:.5px; cursor:pointer; position:relative;
+      box-shadow:
+        0 4px 15px rgba(88,101,242,.4),
+        0 0 10px rgba(255,255,255,.1),
+        inset 0 0 5px rgba(255,255,255,.2);
+      overflow:hidden; transition:all .3s;
+    }
+    button.primary:hover {
+      background:linear-gradient(135deg,#7d89ff,#4e57e0);
+      box-shadow:
+        0 6px 22px rgba(88,101,242,.6),
+        0 0 24px rgba(255,255,255,.2),
+        inset 0 0 10px rgba(255,255,255,.3);
+      transform:scale(1.03);
+    }
+    button.primary:active {
+      transform:scale(0.96);
+      box-shadow:inset 0 4px 6px rgba(0,0,0,.3);
+    }
+    button.primary.loading {
+      color: #ffffffa2; pointer-events:none;
+    }
+
+    button.secondary {
+      margin-top:8px; padding:6px 12px;
+      background:#5865f2; color:#fff;
+      font-size:14px; border:none; border-radius:6px;
+      position:relative; overflow:hidden;
+    }
+    button.secondary::after {
+      content:''; position:absolute;
+      top:0; left:0; width:100%; height:100%;
+      background:rgba(255,255,255,0.1);
+      opacity:0; transition:opacity .3s;
+    }
+    button.secondary:hover::after { opacity:1; }
+    button.secondary:active::after { background:rgba(255,255,255,0.2); }
+    #stopSpam, #leaveBtn {
+      width:48%; padding:10px;
+      border:none; border-radius:10px;
+      background:linear-gradient(135deg,#e74c3c,#c0392b);
+      color:#fff; font-weight:700; font-size:14px;
+      letter-spacing:.5px; cursor:pointer; transition:all .3s;
+      margin-top:12px;
+      box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+    }
+    #stopSpam:hover, #leaveBtn:hover {
+      background:linear-gradient(135deg,#c0392b,#e74c3c);
+      transform:scale(1.03);
+    }
+    #stopSpam:active, #leaveBtn:active {
+      transform:scale(0.96);
+      box-shadow:inset 0 4px 6px rgba(0,0,0,.3);
+    }
+    .button-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    details { margin-top:18px; }
+    summary { list-style:none; padding-left:20px; cursor:pointer; font-weight:600; position:relative; margin-top:0; }
+    summary::-webkit-details-marker { display:none; }
+    summary::marker { content:none; }
+    summary::before { content:'▶'; position:absolute; left:0; top:50%; transform:translateY(-50%); transition:transform .3s ease; }
+    details[open] > summary::before { transform:translateY(-50%) rotate(90deg); }
+    .detail-content { transform-origin:top center; transform:scaleY(0); opacity:0; transition:transform .3s ease, opacity .3s ease; }
+    details[open] .detail-content { transform:scaleY(1); opacity:1; }
+
+    #log { margin-top:20px; padding:10px; height:120px; overflow-y:auto; background:#202225; border-radius:10px; font-family:monospace; font-size:12px; white-space:pre-wrap; resize: vertical;}
+    @media (max-width: 600px) {
+      .card {
+        padding: 16px;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+      }
+
+      label {
+        font-size: 13px;
+        margin-top: 12px;
+      }
+
+      input[type="text"],
+      textarea,
+      input[type="number"] {
+        padding: 8px;
+        font-size: 12px;
+      }
+
+      button.primary {
+        padding: 12px;
+        font-size: 16px;
+      }
+
+      button.secondary {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .row label {
+        width: 100%;
+      }
+
+      .button-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      #stopSpam,
+      #leaveBtn {
+        width: 100%;
+      }
+
+      details summary {
+        font-size: 13px;
+        padding-left: 18px;
+      }
+
+      .checkbox-container {
+        font-size: 13px;
+      }
+
+      #log {
+        height: 80px;
+        font-size: 11px;
+      }
+    }
+    .radio-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+    margin-right: 16px;
+  }
+
+  .radio-container input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4f545c;
+    border: 2px solid #5865f2;
+    border-radius: 50%;
+    position: relative;
+    transition: background .3s ease, border-color .3s ease;
+  }
+
+  .radio-container input[type="radio"]::before {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 10px; height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform .2s ease-out;
+  }
+
+  .radio-container input[type="radio"]:checked {
+    background: #5865f2;
+    border-color: #7289da;
+  }
+
+  .radio-container input[type="radio"]:checked::before {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .radio-container span {
+    color: #fff;
+    transition: color .3s;
+  }
+  .radio-container input[type="radio"]:checked + span {
+    color: #adb8ff;
+  }
+.styled-select {
+  margin-top: 8px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #202225;
+  color: #fff;
+  font-family: monospace;
+  font-size: 15px;
+  appearance: none;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(88,101,242,0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px 18px;
+}
+.styled-select:focus {
+  box-shadow: 0 0 0 3px rgba(114,137,218,0.3);
+  border: 1px solid #7289da;
+}
+.styled-select option {
+  background: #36393f;
+  color: #fff;
+}
+.styled-select::-ms-expand {
+  display: none;
+}
+  .token-masked {
+    font-family: monospace;
+    -webkit-text-security: disc;
+    text-security: disc;
+    letter-spacing: 0;
+  }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>荒衆会 Discord Raider</h2>
+    <form id="form">
+      <label>トークン
+        <div style="position:relative;">
+          <textarea id="tokens" rows="4" placeholder="カンマ / 改行 / スペースで区切る MTM1ODc4MTE3NTIzMzI1MzU*****,MTEwMDU5Njc1NjQ1NjE2MTMwM*****,..." style="width:100%;padding-right:32px;"></textarea>
+          <button id="tokenMaskToggleBtn" type="button" aria-label="マスク切替" style="position:absolute;top:8px;right:8px;background:none;border:none;padding:0;margin:0;cursor:pointer;width:24px;height:24px;display:flex;align-items:center;justify-content:center;opacity:0.7;">
+            <span id="tokenMaskIcon">
+              <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/></svg>
+            </span>
+          </button>
+        </div>
+      </label>
+
+      <label>サーバーID
+        <input type="text" id="guildId" placeholder="123456789012345678">
+      </label>
+
+      <label>チャンネルID
+        <textarea id="channelIds" rows="5" placeholder="カンマ / 改行 / スペースで区切る 123456789012345678,123456789012345678,..."></textarea>
+      </label>
+      <button type="button" id="autoFillChannels" class="secondary">チャンネル自動取得</button>
+    <label>メッセージ内容
+      <textarea id="messageText" rows="4" placeholder="送信するメッセージを入力"></textarea>
+    </label>
+      <label class="checkbox-container">
+        <input type="checkbox" id="allmention" checked>
+        <span>全体メンション</span>
+      </label>
+      <label class="checkbox-container">
+        <input type="checkbox" id="randomize">
+        <span>メッセージのランダマイズ</span>
+      </label>
+      <div class="row">
+        <label>メッセージ送信間隔
+          <input type="number" id="delay" min="0" step="0.1" placeholder="0"> 秒
+        </label>
+        <label>メッセージ送信上限
+          <input type="number" id="limit" min="1" step="1" placeholder="0"> 回
+        </label>
+      </div>
+
+      <details>
+        <summary>メンション設定</summary>
+        <div class="detail-content">
+          <label style="margin-top:12px;">メンションするユーザーID一覧
+            <textarea id="mentionIds" rows="2" placeholder="カンマ / 改行 / スペースで区切る 123456789012345678,123456789012345678"></textarea>
+            <button type="button" id="fetchMentions" class="secondary" style="margin-top:8px;">メンション自動取得</button>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+              <label for="mentionLimit" style="margin:0;font-weight:bold;">メンション上限</label>
+              <input type="range" id="mentionLimit" min="1" max="50" step="1" value="1" style="width: 120px;vertical-align:middle;">
+              <span id="mentionLimitValue" style="font-weight:bold;">1</span>
+            </div>
+          </label>
+          <label class="checkbox-container" style="margin-top:8px;">
+            <input type="checkbox" id="randomMention">
+            <span>ランダムメンション</span>
+          </label>
+        </div>
+      </details>
+
+      <details>
+        <summary>投票設定</summary>
+        <div class="detail-content">
+          <label style="margin-top:12px; margin-bottom:2px;">投票 タイトル
+            <input type="text" id="pollTitle" placeholder="投票タイトル">
+          </label>
+          <label style="margin-top:4px; margin-bottom:2px;">投票 選択肢
+            <textarea id="pollAnswers" rows="2" placeholder="カンマ / 改行 / スペースで区切る 選択肢1,選択肢2,..."></textarea>
+          </label>
+          <label style="margin-top:4px; margin-bottom:2px;">開催期間
+            <select id="pollDuration" class="styled-select">
+              <option value="1">1時間</option>
+              <option value="4">4時間</option>
+              <option value="8">8時間</option>
+              <option value="24" selected>24時間</option>
+              <option value="72">3日間</option>
+              <option value="168">1週間</option>
+              <option value="336">2週間</option>
+            </select>
+          </label>
+          <label class="checkbox-container" style="margin-top:8px;">
+            <input type="checkbox" id="pollInstantEnd">
+            <span>即時終了</span>
+          </label>
+          <label class="checkbox-container" style="margin-top:8px;">
+            <input type="checkbox" id="pollEnabled">
+            <span>投票を有効にする</span>
+          </label>
+        </div>
+      </details>
+
+      <button id="submitBtn" type="submit" class="primary" disabled>実行</button>
+    </form>
+    
+    <div class="button-container">
+      <button id="stopSpam" class="secondary">スパム停止</button>
+      <button id="leaveBtn" class="secondary">サーバー退出</button>
+    </div>
+
+    <div id="log"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var mentionLimit = document.getElementById('mentionLimit');
+        var mentionLimitValue = document.getElementById('mentionLimitValue');
+        if (mentionLimit && mentionLimitValue) {
+          mentionLimitValue.textContent = mentionLimit.value;
+          mentionLimit.addEventListener('input', function() {
+            mentionLimitValue.textContent = mentionLimit.value;
+            if (typeof saveFormHistory === 'function') saveFormHistory();
+          });
+        }
+      });
+    </script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      const tokensTextarea = document.getElementById('tokens');
+      const maskBtn = document.getElementById('tokenMaskToggleBtn');
+      const maskIcon = document.getElementById('tokenMaskIcon');
+      let masked = true;
+      try {
+        const data = JSON.parse(localStorage.getItem('freeze_spammer_form')||'{}');
+        if (typeof data.tokenMask === 'boolean') masked = data.tokenMask;
+      } catch(e) {}
+      function setTokenMask() {
+        if (masked) {
+          tokensTextarea.classList.add('token-masked');
+          maskIcon.innerHTML = '<svg id="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-6 0-10-8-10-8a18.4 18.4 0 0 1 5.06-5.94"/><path d="M1 1l22 22"/><path d="M9.53 9.53A3 3 0 0 0 12 15a3 3 0 0 0 2.47-5.47"/><path d="M12 4c6 0 10 8 10 8a18.4 18.4 0 0 1-5.06 5.94"/></svg>';
+        } else {
+          tokensTextarea.classList.remove('token-masked');
+          maskIcon.innerHTML = '<svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/></svg>';
+        }
+      }
+      maskBtn.addEventListener('click', function() {
+        masked = !masked;
+        setTokenMask();
+        try {
+          const data = JSON.parse(localStorage.getItem('freeze_spammer_form')||'{}');
+          data.tokenMask = masked;
+          localStorage.setItem('freeze_spammer_form', JSON.stringify(data));
+        } catch(e) {}
+      });
+      setTokenMask();
+    });
+  </script>
+  <script>
+    const form = document.getElementById('form');
+    const formKeys = [
+      'tokens','guildId','channelIds','messageText','allmention','randomize','delay','limit','mentionIds','mentionLimit','randomMention','pollTitle','pollAnswers','pollDuration','pollInstantEnd','pollEnabled','tokenMask'
+    ];
+    const FORM_STORAGE_KEY = 'freeze_spammer_form';
+    function saveFormHistory() {
+      const data = {};
+      for (const key of formKeys) {
+        if (key === 'tokenMask') {
+          data[key] = (function(){
+            try {
+              const d = JSON.parse(localStorage.getItem('freeze_spammer_form')||'{}');
+              if (typeof d.tokenMask === 'boolean') return d.tokenMask;
+            } catch(e) {}
+            return true;
+          })();
+          continue;
+        }
+        const el = form.elements[key];
+        if (!el) continue;
+        if (el.type === 'checkbox') data[key] = el.checked;
+        else if (el.type === 'radio') {
+          const checked = form.querySelector(`input[name="${key}"]:checked`);
+          data[key] = checked ? checked.value : '';
+        } else data[key] = el.value;
+      }
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(data));
+    }
+    function loadFormHistory() {
+      const data = JSON.parse(localStorage.getItem(FORM_STORAGE_KEY)||'{}');
+      for (const key of formKeys) {
+        if (key === 'tokenMask') continue;
+        const el = form.elements[key];
+        if (!el || data[key] === undefined) continue;
+        if (el.type === 'checkbox') el.checked = !!data[key];
+        else if (el.type === 'radio') {
+          const radio = form.querySelector(`input[name="${key}"][value="${data[key]}"]`);
+          if (radio) radio.checked = true;
+        } else {
+          el.value = data[key];
+          if (key === 'mentionLimit') {
+            var mentionLimitValue = document.getElementById('mentionLimitValue');
+            if (mentionLimitValue) mentionLimitValue.textContent = el.value;
+          }
+        }
+      }
+    }
+    form.addEventListener('input', saveFormHistory);
+    window.addEventListener('DOMContentLoaded', loadFormHistory);
+    function parseIds(str) {
+      return str.split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
+    }
+    function log(msg, isError = false) {
+      const logDiv = document.getElementById('log');
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.color = isError ? '#ff6b6b' : '#e0e0e0';
+
+      const isAtBottom = (logDiv.scrollTop + logDiv.clientHeight) >= (logDiv.scrollHeight - 2);
+      logDiv.appendChild(el);
+
+      while (logDiv.children.length > 100) {
+        logDiv.removeChild(logDiv.firstChild);
+      }
+
+      if (isAtBottom) {
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+    }
+    function setBtnState(running) {
+      document.getElementById('submitBtn').disabled = running;
+      document.getElementById('stopSpam').disabled = !running;
+    }
+    function enableSubmitIfReady() {
+
+      const tokens = parseIds(document.getElementById('tokens').value);
+      const channelIds = parseIds(document.getElementById('channelIds').value);
+      const messageText = document.getElementById('messageText').value.trim();
+      document.getElementById('submitBtn').disabled = !(tokens.length && channelIds.length && messageText);
+    }
+
+
+    document.getElementById('autoFillChannels').addEventListener('click', async function() {
+      const tokens = parseIds(document.getElementById('tokens').value);
+      const guildId = document.getElementById('guildId').value.trim();
+      if (!tokens.length || !guildId) {
+        log('トークンとサーバーIDを入力してください', true); return;
+      }
+      for (const token of tokens) {
+        try {
+          const res = await axios.get(`https://discord.com/api/v9/guilds/${guildId}/channels`, {
+            headers: { Authorization: token }
+          });
+
+          const channels = res.data.filter(ch => [0,2,5].includes(ch.type));
+          const permittedIds = [];
+          for (const ch of channels) {
+
+            let canSend = false;
+
+            if (ch.permissions !== undefined) {
+
+              if (ch.type === 0 || ch.type === 5) {
+                canSend = (parseInt(ch.permissions) & 0x800) !== 0;
+              } else if (ch.type === 2) {
+                canSend = (parseInt(ch.permissions) & 0x100000) !== 0;
+              }
+            } else if (ch.permission_overwrites && Array.isArray(ch.permission_overwrites)) {
+
+              const everyone = ch.permission_overwrites.find(po => po.id === guildId);
+              if (everyone) {
+                if (ch.type === 0 || ch.type === 5) {
+                  canSend = (parseInt(everyone.allow) & 0x800) !== 0;
+                } else if (ch.type === 2) {
+                  canSend = (parseInt(everyone.allow) & 0x100000) !== 0;
+                }
+              } else {
+
+                canSend = true;
+              }
+            } else {
+
+              canSend = true;
+            }
+            if (canSend) permittedIds.push(ch.id);
+          }
+          if (permittedIds.length) {
+            document.getElementById('channelIds').value = permittedIds.join(',');
+            log('チャンネルID自動取得成功（権限ありのみ）');
+            enableSubmitIfReady();
+            return;
+          }
+        } catch (e) {
+
+        }
+      }
+      log('チャンネルID自動取得に失敗（権限なしまたは取得不可）', true);
+    });
+
+    document.getElementById('fetchMentions').addEventListener('click', async function() {
+      const tokens = parseIds(document.getElementById('tokens').value);
+      const channelIds = parseIds(document.getElementById('channelIds').value);
+      if (!tokens.length || !channelIds.length) {
+        log('トークンとチャンネルIDを入力してください', true); return;
+      }
+      const userSet = new Set();
+      for (const channelId of channelIds) {
+        try {
+          const res = await axios.get(`https://discord.com/api/v10/channels/${channelId}/messages?limit=100`, {
+            headers: { Authorization: tokens[0] }
+          });
+          res.data.forEach(msg => {
+            if (msg.author && msg.author.id && !userSet.has(msg.author.id)) {
+              userSet.add(msg.author.id);
+            }
+          });
+        } catch (e) {}
+      }
+      let mentionArr = Array.from(userSet);
+      document.getElementById('mentionIds').value = mentionArr.join(',');
+      log(`メンションID自動取得: ${mentionArr.length}件`);
+      enableSubmitIfReady();
+    });
+
+    let spamRunning = false;
+    let spamAbort = false;
+    document.getElementById('form').addEventListener('input', enableSubmitIfReady);
+    enableSubmitIfReady();
+    
+    window.addEventListener('DOMContentLoaded', enableSubmitIfReady);
+
+    document.getElementById('form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (spamRunning) return;
+      spamRunning = true;
+      spamAbort = false;
+      setBtnState(true);
+      document.getElementById('log').innerHTML = '';
+
+      const tokens = parseIds(document.getElementById('tokens').value);
+      const guildId = document.getElementById('guildId').value.trim();
+      const channelIds = parseIds(document.getElementById('channelIds').value);
+      const allmention = document.getElementById('allmention').checked;
+      const randomize = document.getElementById('randomize').checked;
+      const delay = parseFloat(document.getElementById('delay').value) || 0;
+      const limit = parseInt(document.getElementById('limit').value) || 0;
+      const mentionIds = parseIds(document.getElementById('mentionIds').value);
+      let mentionLimit = parseInt(document.getElementById('mentionLimit').value) || 1;
+      if (mentionLimit < 1) mentionLimit = 1;
+      if (mentionLimit > 50) mentionLimit = 50;
+      const randomMention = document.getElementById('randomMention').checked;
+      const pollEnabled = document.getElementById('pollEnabled').checked;
+      const pollTitle = document.getElementById('pollTitle').value.trim();
+      const pollAnswers = parseIds(document.getElementById('pollAnswers').value);
+      const pollDurationHour = parseInt(document.getElementById('pollDuration').value) || 24;
+      const pollInstantEnd = document.getElementById('pollInstantEnd').checked;
+
+      const baseMsg = document.getElementById('messageText').value.trim();
+
+      const pollSendHistory = [];
+
+      let count = 0;
+
+      function randomStr(len=16) {
+        let s = '';
+        while (s.length < len) s += Math.random().toString(16).slice(2);
+        return s.slice(0, len);
+      }
+      outer: for (let i = 0; ; i++) {
+        if (spamAbort) break;
+        if (limit && count >= limit) break;
+        let sendChannels = [...channelIds];
+        for (const channelId of sendChannels) {
+          if (spamAbort) break outer;
+          let msg = baseMsg;
+          if (randomize) msg += ' ' + randomStr(16);
+          if (allmention) msg += ' @everyone';
+          if (mentionIds.length) {
+            let useMentionIds = mentionIds.slice();
+            if (useMentionIds.length > mentionLimit) {
+              if (randomMention) {
+
+                for (let i = useMentionIds.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [useMentionIds[i], useMentionIds[j]] = [useMentionIds[j], useMentionIds[i]];
+                }
+                useMentionIds = useMentionIds.slice(0, mentionLimit);
+              } else {
+
+                useMentionIds = useMentionIds.slice(0, mentionLimit);
+              }
+            }
+
+            if (randomMention) {
+              const mentionStr = useMentionIds.map(id => `<@${id}>`).join(' ');
+              msg += '\n' + mentionStr;
+            }
+          }
+          let tryCount = 0;
+          while (true) {
+            if (spamAbort) break outer;
+            try {
+              if (spamAbort) break outer;
+              if (pollEnabled && pollTitle && pollAnswers.length) {
+
+                const pollData = {
+                  content: msg,
+                  poll: {
+                    question: { text: pollTitle },
+                    answers: pollAnswers.map(a => ({ poll_media: { text: a } })),
+                    duration: pollDurationHour
+                  },
+                  flags: 0
+                };
+                if (spamAbort) break outer;
+                const pollRes = await axios.post(`https://discord.com/api/v10/channels/${channelId}/messages`, pollData, {
+                  headers: { Authorization: tokens[i % tokens.length], 'Content-Type': 'application/json' }
+                });
+                if (spamAbort) break outer;
+                log(`投票送信: ${channelId}`);
+                if (pollInstantEnd) {
+                  const pollId = pollRes.data.id;
+                  if (pollId) {
+
+                    const pollRecord = { channelId, pollId, expired: false };
+                    pollSendHistory.push(pollRecord);
+
+                    (async () => {
+                      let success = false;
+                      for (let retry = 0; retry < 5; retry++) {
+                        if (spamAbort) break;
+                        try {
+                          if (spamAbort) break;
+                          await axios.post(`https://discord.com/api/v9/channels/${channelId}/polls/${pollId}/expire`, {}, {
+                            headers: { Authorization: tokens[i % tokens.length], 'Content-Type': 'application/json' }
+                          });
+                          if (spamAbort) break;
+                          log(`投票即時終了: ${channelId} (${pollId})`);
+                          pollRecord.expired = true;
+                          success = true;
+                          break;
+                        } catch (expireErr) {
+                          if (spamAbort) break;
+                          if (expireErr?.response?.status === 429) {
+                            const retryAfter = (expireErr.response.data && expireErr.response.data.retry_after) ? expireErr.response.data.retry_after : 2;
+                            log(`レートリミット(投票即時終了)：${retryAfter}秒待機`, true);
+                            let waited = 0;
+                            while (waited < retryAfter && !spamAbort) {
+                              await new Promise(r => setTimeout(r, 200));
+                              waited += 0.2;
+                            }
+                            if (spamAbort) break;
+                          } else {
+                            if (retry === 4) {
+                              log(`投票即時終了失敗: ${channelId} (${pollId})`, true);
+                            }
+                            let waited = 0;
+                            while (waited < 1 && !spamAbort) {
+                              await new Promise(r => setTimeout(r, 200));
+                              waited += 0.2;
+                            }
+                            if (spamAbort) break;
+                          }
+                        }
+                      }
+                    })();
+                  } else {
+                    log(`投票ID(=メッセージID)が取得できず即時終了できません: ${channelId}`, true);
+                  }
+                }
+              } else {
+
+                if (spamAbort) break outer;
+                await axios.post(`https://discord.com/api/v10/channels/${channelId}/messages`, { content: msg }, {
+                  headers: { Authorization: tokens[i % tokens.length], 'Content-Type': 'application/json' }
+                });
+                if (spamAbort) break outer;
+                log(`送信: ${channelId}`);
+              }
+              count++;
+              break;
+            } catch (e) {
+              if (spamAbort) break outer;
+              if (e?.response?.status === 429) {
+                const retryAfter = (e.response.data && e.response.data.retry_after) ? e.response.data.retry_after : 2;
+                log(`レートリミット：${retryAfter}秒待機`, true);
+                let waited = 0;
+                while (waited < retryAfter && !spamAbort) {
+                  await new Promise(r => setTimeout(r, 200));
+                  waited += 0.2;
+                }
+                if (spamAbort) break outer;
+                tryCount++;
+                if (tryCount > 5) { log('リトライ上限', true); break; }
+                continue;
+              } else {
+                log(`送信失敗: ${channelId} (${e?.response?.status || ''})`, true);
+                break;
+              }
+            }
+          }
+          if (spamAbort) break outer;
+          if (delay > 0) {
+            let waited = 0;
+            while (waited < delay && !spamAbort) {
+              await new Promise(r => setTimeout(r, 200));
+              waited += 0.2;
+            }
+            if (spamAbort) break outer;
+          }
+          if (limit && count >= limit) break outer;
+        }
+      }
+
+
+
+      log('スパム送信停止');
+      spamRunning = false;
+      setBtnState(false);
+    });
+
+    document.getElementById('stopSpam').addEventListener('click', function() {
+      if (!spamRunning) return;
+      spamAbort = true;
+      setBtnState(false);
+    });
+
+    document.getElementById('leaveBtn').addEventListener('click', async function() {
+      const tokens = parseIds(document.getElementById('tokens').value);
+      const guildId = document.getElementById('guildId').value.trim();
+      if (!tokens.length || !guildId) {
+        log('トークンとサーバーIDを入力してください', true); return;
+      }
+      let ok = false;
+      for (const token of tokens) {
+        try {
+          await axios.delete(`https://discord.com/api/v9/users/@me/guilds/${guildId}`, {
+            headers: { Authorization: token }
+          });
+          ok = true;
+        } catch (e) {}
+      }
+      log(ok ? 'サーバー退出リクエスト送信' : 'サーバー退出失敗', !ok);
+    });
+    </script>
+  </body>
+</html>
